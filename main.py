@@ -2,6 +2,7 @@ import asyncio
 import logging
 import os
 import json
+import anthropic
 from typing import Dict, Any
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -48,6 +49,19 @@ async def main():
     # Validate API key
     if not config['anthropic']['api_key']:
         raise ValueError("Error: ANTHROPIC_API_KEY not found in environment or config")
+        
+    # Initialize Anthropic client
+    client = anthropic.Anthropic(
+        api_key=config['anthropic']['api_key'],
+    )
+
+    # Initialize Claude with system prompt
+    system_message = await client.messages.create(
+        model="claude-3-5-sonnet-latest",
+        max_tokens=8192,
+        temperature=1,
+        system="You are an AI assistant specialized in managing and optimizing the FreqTrade cryptocurrency trading bot platform. Your core function is to serve as an intelligent interface between users and the FreqTrade system, translating natural language requests into concrete actions and providing expert guidance on trading strategies, configuration, and system management."
+    )
     
     # Configure logging
     logging.basicConfig(
@@ -61,8 +75,8 @@ async def main():
         config['freqtrade']['config_path']
     )
     
-    claude_controller = ClaudeFreqAIController(config)
-    freqai_integration = FreqAIIntegration(config)
+    claude_controller = ClaudeFreqAIController(config, client)
+    freqai_integration = FreqAIIntegration(config, client)
     
     # Add controller to bot
     bot.claude_controller = claude_controller

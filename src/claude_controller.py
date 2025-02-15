@@ -8,6 +8,10 @@ from ..utils.rate_limiter import RateLimiter
 
 logger = logging.getLogger(__name__)
 
+class APIError(Exception):
+    """Custom exception for API related errors"""
+    pass
+
 class ClaudeFreqAIController:
     """
     Controller class to integrate Claude with FreqTrade/FreqAI functionality
@@ -46,12 +50,24 @@ class ClaudeFreqAIController:
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.claude = Anthropic(api_key=config['anthropic']['api_key'])
-        self.model_version = config.get('claude_integration', {}).get(
-            'model_version', 'claude-3-5-sonnet-20241022'
-        )
+        
+        # Initialize with system prompt
+        self.system_prompt = """You are an AI assistant specialized in managing and optimizing the FreqTrade cryptocurrency trading bot platform. Your core function is to serve as an intelligent interface between users and the FreqTrade system, translating natural language requests into concrete actions and providing expert guidance on trading strategies, configuration, and system management."""
+        
+        # Set default parameters
+        self.model_version = "claude-3-5-sonnet-latest"
+        self.max_tokens = 8192
+        self.temperature = 1
+
+        # Update model version from config if present
+        if 'claude_integration' in config:
+            self.model_version = config['claude_integration'].get('model_version', self.model_version)
+            self.max_tokens = config['claude_integration'].get('max_tokens', self.max_tokens)
+            self.temperature = config['claude_integration'].get('temperature', self.temperature)
+
         self.base_config_path = "config.json"
         self.rate_limiter = RateLimiter()
-        
+
     async def _call_claude_api(self, messages: list) -> str:
         try:
             self.rate_limiter.limit()
@@ -66,12 +82,12 @@ class ClaudeFreqAIController:
                     current_config=json.dumps(current_config, indent=2)
                 )
             
-            claude_config = self.config.get('claude_integration', {})
             response = await self.claude.messages.create(
-                model=claude_config.get('model_version', 'claude-3-5-sonnet-20241022'),
-                messages=messages,
-                temperature=claude_config.get('temperature', 0.7),
-                max_tokens=claude_config.get('max_tokens', 4096)
+                model=self.model_version,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                system=self.system_prompt,
+                messages=messages
             )
             return response.content[0].text
         except Exception as e:
@@ -286,3 +302,12 @@ class ClaudeFreqAIController:
             code = response.split("```python")[1].split("```")[0]
             return code.strip()
         return response.strip()
+
+    def _get_current_config(self) -> Dict[str, Any]:
+        """Get current FreqTrade configuration"""
+        try:
+            with open(self.base_config_path, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            logger.error(f"Error reading config: {str(e)}")
+            return {}

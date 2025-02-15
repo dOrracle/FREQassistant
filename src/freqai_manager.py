@@ -1,3 +1,4 @@
+import logging
 from anthropic import Anthropic
 import json
 import time
@@ -6,6 +7,8 @@ import re
 from .simulated_components import SimulatedFreqAIModel
 from typing import Dict, Any, Union, Optional
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 class ModelManager:
     def __init__(self, freqai_model):
@@ -33,7 +36,7 @@ class FreqAIManager:
     async def optimize_strategy(self, description: str) -> str:
         try:
             response = await self.claude.messages.create(
-                model="claude-3-sonnet-20240229",
+                model="claude-3-5-sonnet-latest",
                 messages=[{
                     "role": "user",
                     "content": f"Create a trading strategy for: {description}"
