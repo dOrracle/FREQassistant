@@ -1,6 +1,24 @@
 # FREQassistant
 
 An AI-powered assistant for FreqTrade that uses Claude AI to help manage, optimize, and automate your cryptocurrency trading strategies.
+*I am just begining to test functions.  I hope the LLM is intregrated with the ML AI in freqAI to assit with trainging and get updates from the ML model.
+*Updates, forks, feedback welcome and encouraged.  
+
+## Features
+
+### AI Assistant Capabilities
+- Natural language trading strategy generation
+- Configuration management
+- Automated backtesting
+- Performance analysis
+- Real-time trading monitoring
+
+### Dashboard Features
+- Real-time metrics visualization
+- Strategy management interface
+- Configuration editor
+- Backtesting results viewer
+- ML model training interface
 
 ## Prerequisites
 
@@ -69,22 +87,6 @@ An AI-powered assistant for FreqTrade that uses Claude AI to help manage, optimi
 2. Access the dashboard:
     - Open `http://localhost:8000` in your web browser
     - Default credentials: admin/password (change these in production)
-
-## Features
-
-### AI Assistant Capabilities
-- Natural language trading strategy generation
-- Configuration management
-- Automated backtesting
-- Performance analysis
-- Real-time trading monitoring
-
-### Dashboard Features
-- Real-time metrics visualization
-- Strategy management interface
-- Configuration editor
-- Backtesting results viewer
-- ML model training interface
 
 ## API Documentation
 
@@ -160,7 +162,9 @@ This project is licensed under the MIT License - see LICENSE file for details.
 
 ## Support
 
-- Cross your fingers harder next time.  Eat a snack.  Drink more beer. 
+- Cross your fingers harder next time.  Eat a snack.  Drink more beer.
+
+- jason@jasonorr.info
 
 ## Acknowledgments
 
