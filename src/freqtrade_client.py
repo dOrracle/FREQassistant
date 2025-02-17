@@ -7,12 +7,7 @@ from datetime import datetime
 class FreqtradeClient:
     """Handles communication with FreqTrade REST API"""
     def __init__(self, base_url: str, api_token: str):
-        self.base_url = base_url.rstrip('/')
-        self.api_token = api_token
-        self.headers = {
-            'Authorization': f'Bearer {api_token}',
-            'Content-Type': 'application/json'
-        }
+        pass
 
     async def _request(self, method: str, endpoint: str, data: Optional[Dict] = None) -> Dict[str, Any]:
         url = f"{self.base_url}/{endpoint}"

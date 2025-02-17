@@ -1,5 +1,5 @@
 import pytest
-from src.claude_controller import ClaudeController
+from src.controllers.claude_controller import ClaudeController
 
 @pytest.mark.asyncio
 async def test_claude_strategy_generation():

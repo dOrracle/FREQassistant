@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 class FreqtradeConfigManager:
     def __init__(self, api_key: str, config_path: str = "config.json"):
+        self.api_key = api_key
+        self.config_path = config_path
         self.claude = Anthropic(api_key=api_key)
         self.config_path = os.path.abspath(config_path)
         self.config = None

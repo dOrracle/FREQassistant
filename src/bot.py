@@ -10,7 +10,7 @@ from .simulated_components import SimulatedExchange, SimulatedFreqAIModel
 from .error_handler import ErrorRecoveryManager
 from .freqai_integration import MonitoringSystem
 from cachetools import TTLCache
-from .claude_controller import ClaudeFreqAIController
+from .controllers.claude_controller import ClaudeFreqAIController
 
 @dataclass
 class SystemState:
@@ -20,24 +20,19 @@ class SystemState:
     performance: Dict[str, Any] = field(default_factory=dict)
     cache: TTLCache = field(default_factory=lambda: TTLCache(maxsize=100, ttl=60))
 
+@dataclass
 class FreqtradeAI:
-    def __init__(self, api_key: str, config_path: str):
-        self.claude = Anthropic(api_key=api_key)
-        self.state = SystemState()
-        self.error_manager = ErrorRecoveryManager(self.state)
-        self.monitoring = MonitoringSystem()
-        self.config_manager = FreqtradeConfigManager(api_key, config_path)
-        self.config = self.config_manager.read_config()
-        
-        # Add ClaudeController initialization
-        self.claude_controller = ClaudeFreqAIController(self.config)
-        
-        self.exchange = SimulatedExchange(self.config)
-        self.freqai_model = SimulatedFreqAIModel(self.config)
-        self.freqai_manager = FreqAIManager(self.freqai_model, self.claude, self.config_manager)
-        self.command_handler = SecureCommands(self)
-        self.logger = logging.getLogger(__name__)
-        self.message_queue = asyncio.Queue()
+    api_key: str
+    config_path: str
+    config_manager: FreqtradeConfigManager = field(init=False)
+    freqai_manager: FreqAIManager = field(init=False)
+    secure_commands: SecureCommands = field(init=False)
+    claude_controller: Optional[ClaudeFreqAIController] = field(default=None, init=False)
+
+    def __post_init__(self):
+        self.config_manager = FreqtradeConfigManager(self.api_key, self.config_path)
+        self.freqai_manager = FreqAIManager()
+        self.secure_commands = SecureCommands()
 
     async def start(self):
         try:

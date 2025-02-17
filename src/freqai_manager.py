@@ -12,26 +12,11 @@ logger = logging.getLogger(__name__)
 
 class ModelManager:
     def __init__(self, freqai_model):
-        self.model = freqai_model
-        self.performance_history = {}
-        
-    async def track_model(self, model_id):
-        performance = self.model.train_and_test()
-        self.performance_history[model_id] = performance
-        return performance
+        pass
 
 class FreqAIManager:
-    def __init__(self, freqai_model: SimulatedFreqAIModel, claude: Anthropic, config_manager):
-        if not isinstance(freqai_model, SimulatedFreqAIModel):
-            raise TypeError("freqai_model must be an instance of SimulatedFreqAIModel")
-        if not isinstance(claude, Anthropic):
-            raise TypeError("claude must be an instance of Anthropic")
-
-        self.freqai = freqai_model
-        self.claude = claude
-        self.config_manager = config_manager
-        self.current_model = None
-        self.model_manager = ModelManager(freqai_model)
+    def __init__(self):
+        pass
 
     async def optimize_strategy(self, description: str) -> str:
         try:

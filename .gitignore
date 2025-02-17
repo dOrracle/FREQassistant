@@ -34,3 +34,10 @@ freqtrade_ai.db
 config.json
 claude_config.json
 *.backup
+
+# Sensitive files
+.env
+src/claude_config.json
+
+# Example files
+!src/claude_config.example.json

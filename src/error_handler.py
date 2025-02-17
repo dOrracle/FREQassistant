@@ -4,25 +4,15 @@ import traceback
 
 class ErrorRecoveryManager:
     def __init__(self, state_manager=None):
-        self.state_manager = state_manager
-        self.handlers = {}
-        self.logger = logging.getLogger(__name__)
+        pass
 
     async def handle_error(self, error, context):
-        if self.state_manager:
-            await self.state_manager.save_state()
-        handler = self.handlers.get(type(error))
-        if handler:
-            return await handler(error, context)
-        self.logger.error(f"Unhandled error: {error}")
-        raise
+        pass
 
 class ErrorHandler:
     """Centralized error handling and recovery"""
     def __init__(self):
-        self.handlers: Dict[Type[Exception], Callable] = {}
-        self.logger = logging.getLogger(__name__)
-        self.recovery_manager = ErrorRecoveryManager()
+        pass
 
     def register(self, exception_type: Type[Exception], handler: Callable):
         """Register an error handler for a specific exception type"""

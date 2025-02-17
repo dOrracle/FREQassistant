@@ -4,38 +4,7 @@ import os
 class StrategyGenerator:
     """Generates FreqTrade strategy files from templates"""
     def __init__(self, template_dir: str = "templates"):
-        self.env = Environment(loader=FileSystemLoader(template_dir))
-        self.template = self.env.get_template("strategy.j2")
-
-    def generate_strategy(self, params: Dict[str, Any]) -> str:
-        """Generate strategy code from template and parameters"""
-        return self.template.render(**params)
-
-    async def create_strategy_from_description(self, description: str, claude) -> str:
-        """Use Claude to create strategy parameters from description"""
-        prompt = f"""
-        Create a FreqTrade strategy based on this description: {description}
-        Return only a JSON object with these parameters:
-        {{
-            "strategy_name": "string",
-            "buy_indicators": ["list of indicators"],
-            "sell_indicators": ["list of indicators"],
-            "timeframe": "string",
-            "minimal_roi": {{"time_in_minutes": percentage}},
-            "stoploss": -float
-        }}
-        """
-        
-        response = await claude.messages.create(
-            model="claude-3-opus-20240229",
-            messages=[{"role": "user", "content": prompt}]
-        )
-        
-        try:
-            params = json.loads(response.content[0].text)
-            return self.generate_strategy(params)
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON from Claude: {e}")
+        pass
 
 # src/state_manager.py
 import sqlite3

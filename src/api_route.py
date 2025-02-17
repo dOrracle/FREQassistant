@@ -1,9 +1,9 @@
+import logging
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
-from .claude_controller import ClaudeFreqAIController
-import logging
+from .controllers.claude_controller import ClaudeFreqAIController
 
 logger = logging.getLogger(__name__)
 

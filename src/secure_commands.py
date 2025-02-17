@@ -2,26 +2,15 @@ from functools import wraps
 from typing import Callable
 from ratelimit import limits, sleep_and_retry
 
-# Add RateLimiter import
 class RateLimiter:
-    def __init__(self):
-        self.calls = {}
-
-    async def check(self):
-        # Basic rate limiting implementation
-        return True
+    pass
 
 class SecurityManager:
-    def __init__(self):
-        self.rate_limiter = RateLimiter()
-        
-    async def validate_request(self, request):
-        await self.rate_limiter.check()
-        return self.validate_command(request)
+    pass
 
 # Modified for testing - user1 has all permissions
 ADMIN_USERS = {
-    'user1': 'password_hash'  # In production, use proper hashing
+    'user1': 'password_hash'
 }
 
 COMMAND_PERMISSIONS = {

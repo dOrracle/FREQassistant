@@ -6,28 +6,22 @@ logger = logging.getLogger(__name__)
 
 class MonitoringSystem:
     def __init__(self):
-        self.metrics_cache = {}
-        self.logger = logging.getLogger(__name__)
+        pass
         
     async def collect_metrics(self):
-        return {
-            "accuracy": self._get_current_accuracy(),
-            "loss": self._get_current_loss()
-        }
-        
-    async def track_api_call(self, response):
-        self.logger.info(f"API call completed: {response}")
+        pass
 
 class FreqAIIntegration:
     """
     Integration layer between FreqTrade's FreqAI and Claude AI.
     Handles command processing and metric tracking.
     """
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any], client: Any):
         self.config = config
-        self.claude_controller = ClaudeFreqAIController(config)
+        self.client = client
+        self.claude_controller = ClaudeFreqAIController(config, client)
         self.metrics_cache: Dict[str, float] = {}
-        self.monitoring = MonitoringSystem()
+        self.monitoring_system = MonitoringSystem()
         
     async def handle_command(self, command: str) -> str:
         """

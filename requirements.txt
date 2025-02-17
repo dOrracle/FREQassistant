@@ -1,37 +1,21 @@
-# Core Dependencies
-anthropic==0.8.1           # For Claude API integration
-python-telegram-bot==20.7  # For Telegram bot functionality
-
-# API and Async
-aiohttp==3.9.3            # For async HTTP requests
-fastapi==0.109.2          # For API endpoints
-uvicorn==0.27.1           # ASGI server
-
-# Data Processing
-pandas==2.2.0             # For data handling
-pyarrow==14.0.1           # Required for pandas
-numpy==1.26.3             # For numerical operations
-
-# Utilities
-ratelimit==2.2.1          # For API rate limiting
-cachetools==5.3.2         # For caching functionality
-python-dateutil==2.8.2    # For date handling
-pydantic==2.6.1           # For data validation
-python-dotenv==1.0.1      # For environment variables
-typing-extensions==4.9.0   # For type hints
-json5==0.9.14             # For JSON handling
-
-# Testing
-pytest==8.0.0             # For testing
-pytest-asyncio==0.23.5    # For async tests
-pytest-cov==4.1.0         # For test coverage
-
-# Development Tools
-rich==13.7.0              # For better console output
-
-freqtrade==2024.2
+# requirements.txt
+anthropic==0.8.1
+python-telegram-bot==20.7
+aiohttp==3.9.3
+fastapi==0.109.2
+uvicorn==0.27.1
+pandas==2.2.0
+pyarrow==14.0.1
+numpy==1.26.3
+ratelimit==2.2.1
+cachetools==5.3.2
+python-dateutil==2.8.2
+pydantic==2.6.1
+python-dotenv==1.0.1
+typing-extensions==4.9.0
+json5==0.9.14
+pytest==8.0.0
+pytest-asyncio==0.23.5
+pytest-cov==4.1.0
+rich==13.7.0
 jinja2==3.1.2
-sqlite3  # Usually included with Python
-aiohttp==3.9.3  # Already in your requirements
-# Note: logging and asyncio are part of Python's standard library
-# and don't need to be in requirements.txt

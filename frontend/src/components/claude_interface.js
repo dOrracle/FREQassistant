@@ -6,11 +6,14 @@ import { useClaudeApi } from '../hooks/useClaudeApi';
 import { API_ENDPOINTS } from '../constants/api';
 import PropTypes from 'prop-types';
 
+// Add LoadingSpinner component with aria-label
 export const LoadingSpinner = () => (
     <div className="flex items-center justify-center">
-        <Loader className="w-5 h-5 animate-spin text-blue-500" />
+        <Loader className="w-5 h-5 animate-spin text-blue-500" aria-label="Loading" />
     </div>
 );
+
+LoadingSpinner.displayName = 'LoadingSpinner';
 
 export default function ClaudeInterface() {
     const [activeTab, setActiveTab] = useState('chat');
@@ -236,3 +239,16 @@ export default function ClaudeInterface() {
         </div>
     );
 }
+
+// Add PropTypes at the end of the file
+ClaudeInterface.propTypes = {
+    onError: PropTypes.func,
+    onSuccess: PropTypes.func,
+    initialMessages: PropTypes.array
+};
+
+ClaudeInterface.defaultProps = {
+    onError: () => {},
+    onSuccess: () => {},
+    initialMessages: []
+};
