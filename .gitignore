@@ -5,6 +5,7 @@ __pycache__/
 *.so
 .Python
 env/
+venv/
 build/
 develop-eggs/
 dist/
@@ -41,3 +42,15 @@ src/claude_config.json
 
 # Example files
 !src/claude_config.example.json
+
+# Configuration files with sensitive data
+src/config.json
+src/claude_config.json
+
+# Example files (don't ignore)
+!src/config.example.json
+!src/claude_config.example.json
+
+# Node
+node_modules/
+build/
