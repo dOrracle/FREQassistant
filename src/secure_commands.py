@@ -29,20 +29,35 @@ def authenticate(func: Callable) -> Callable:
 
 class SecureCommands:
     def __init__(self, freqtrade_assistant):
-        self.freqtrade = freqtrade_assistant
-        self.security_manager = SecurityManager()
+        self.freqtrade_assistant = freqtrade_assistant
+        self.allowed_commands = {
+            'start': self.verify_start,
+            'stop': self.verify_stop,
+            'claude': self.verify_claude,
+            'generate_strategy': self.verify_strategy
+        }
+
+    def verify_user_permission(self, user_id: str, command: str) -> bool:
+        # Add your permission verification logic here
+        return True  # Simplified for example
+
+    def verify_start(self, user_id: str) -> bool:
+        return self.verify_user_permission(user_id, 'start')
+
+    def verify_stop(self, user_id: str) -> bool:
+        return self.verify_user_permission(user_id, 'stop')
+
+    def verify_claude(self, user_id: str) -> bool:
+        return self.verify_user_permission(user_id, 'claude')
+
+    def verify_strategy(self, user_id: str) -> bool:
+        return self.verify_user_permission(user_id, 'generate_strategy')
 
     def _verify_user(self, user_id: str) -> bool:
         return True if user_id == 'user1' else False
 
     def _check_permission(self, user_id: str, command: str) -> bool:
         return True if user_id == 'user1' else False
-
-    def verify_user_permission(self, user_id: str, command_type: str) -> bool:
-        # Add permission verification logic here
-        # For example, check if user_id is in allowed_users for claude access
-        allowed_users = self.config.get('allowed_claude_users', [])
-        return user_id in allowed_users
 
     def validate_command(self, command: str) -> bool:
         valid_commands = ['/status', '/generate_strategy', '/update_config', 

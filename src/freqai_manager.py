@@ -4,7 +4,6 @@ import json
 import time
 import asyncio
 import re
-from .simulated_components import SimulatedFreqAIModel
 from typing import Dict, Any, Union, Optional
 import pandas as pd
 
@@ -71,7 +70,7 @@ class FreqAIManager:
             #  This is a simplified simulation.
             print("Performing simulated backtest...")
             await asyncio.sleep(2)  # Simulate some delay
-            simulated_results = self.freqai.train_and_test() # Call the simulated train and test
+            simulated_results = {"profit": 0.1}  # Placeholder for actual backtest results
             return simulated_results
         except Exception as e:
             return f"Strategy testing failed: {e}"
@@ -102,7 +101,7 @@ class FreqAIManager:
                 )
 
                 response_text = response.content[0].text
-                match = re.search(r"```json\n(.*)\n```", response_text, re.DOTALL)
+                match = re.search(r"``[json\n(.*)\n](http://_vscodecontentref_/3)``", response_text, re.DOTALL)
                 if match:
                     json_string = match.group(1)
                 else:

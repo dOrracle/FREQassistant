@@ -1,11 +1,8 @@
 # Python
-__pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
-venv/
 build/
 develop-eggs/
 dist/
@@ -21,36 +18,41 @@ var/
 .installed.cfg
 *.egg
 
-# Environment variables
+# Sensitive files
 .env
+**/claude_config.json
+**/config.json
+*.backup
+*.pem
+*.key
+config-private.json
+*.secret
 
-# IDE
+# Logs and data
+logs/
+data/
+freqtrade_ai.db
+*.log
+*.csv
+*.sqlite
+*.db
+
+# Development
+__pycache__/
+.venv/
+venv/
+node_modules/
 .idea/
 .vscode/
 *.swp
 *.swo
+.DS_Store
+.pytest_cache/
+.coverage
+coverage.xml
+.tox/
+.cache
 
-# Project-specific
-freqtrade_ai.db
-config.json
-claude_config.json
-*.backup
-
-# Sensitive files
-.env
-src/claude_config.json
-
-# Example files
-!src/claude_config.example.json
-
-# Configuration files with sensitive data
-src/config.json
-src/claude_config.json
-
-# Example files (don't ignore)
-!src/config.example.json
-!src/claude_config.example.json
-
-# Node
-node_modules/
-build/
+# Allow example files
+!**/config.example.json
+!**/claude_config.example.json

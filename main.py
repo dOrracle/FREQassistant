@@ -1,5 +1,6 @@
 import asyncio
-import logging  # This was missing from some code paths
+import logging
+import logging.config
 import os
 import json
 from typing import Dict, Any, Optional
@@ -8,7 +9,7 @@ import anthropic
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from src.bot import FreqtradeAI
 from src.freqai_integration import FreqAIIntegration
 from src.controllers.claude_controller import ClaudeFreqAIController
@@ -20,29 +21,48 @@ load_dotenv()  # Load environment variables from .env file
 bot: Optional[FreqtradeAI] = None
 
 # Initialize FastAPI and configure logging
-app = FastAPI(title="FreqAssistant API", version="1.0.0")
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+app = FastAPI(
+    title="FreqAssistant API",
+    version="1.0.0",
+    description="FastAPI backend for FreqAssistant"
 )
+logging.config.fileConfig('logging.conf')
 logger = logging.getLogger(__name__)
 
-# Add CORS middleware
+# Get CORS origins from environment variable
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:8081,http://127.0.0.1:8081").split(",")
+
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Mount the React app
-app.mount("/", StaticFiles(directory="frontend/build", html=True))
+# Update the static files mounting
+frontend_path = os.path.join(os.getcwd(), "frontend", "build")
+if os.path.exists(frontend_path):
+    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+
+# Add a root endpoint
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    logger.info("Root endpoint called")
+    return {
+        "message": "Welcome to FreqAssistant API",
+        "version": "1.0.0",
+        "status": "running"
+    }
 
 # Add health check endpoint
 @app.get("/health")
 async def health_check():
-    return JSONResponse({"status": "healthy"})
+    """Health check endpoint"""
+    logger.info("Health check endpoint called")
+    return {"status": "healthy"}
 
 def validate_config(config: Dict[str, Any]) -> None:
     """Validate required configuration values"""
@@ -62,8 +82,13 @@ def validate_config(config: Dict[str, Any]) -> None:
 def load_config(config_path: str = "claude_config.json") -> Dict[str, Any]:
     """Load configuration from JSON file"""
     if not os.path.exists(config_path):
-        logger.error(f"Config file not found: {config_path}")
-        raise FileNotFoundError(f"Config file not found: {config_path}")
+        # Try in config directory
+        alt_path = os.path.join('config', config_path)
+        if os.path.exists(alt_path):
+            config_path = alt_path
+        else:
+            logger.error(f"Config file not found: {config_path}")
+            raise FileNotFoundError(f"Config file not found: {config_path}")
         
     try:
         with open(config_path, 'r') as f:
@@ -135,35 +160,62 @@ async def shutdown_event() -> None:
 
 if __name__ == "__main__":
     try:
-        server = uvicorn.Server(
-            uvicorn.Config(
-                app,
-                host="0.0.0.0",
-                port=int(os.getenv('PORT', 8000)),
-                log_level=os.getenv('LOG_LEVEL', 'info').upper(),
-                lifespan="on"
-            )
-        )
+        # Get log level with proper fallback
+        log_level = os.getenv('LOG_LEVEL', 'info').lower()
+        if log_level not in ('critical', 'error', 'warning', 'info', 'debug', 'trace'):
+            log_level = 'info'
+            
+        # Try different ports if 8000 is in use
+        port = int(os.getenv('PORT', 8000))
+        max_port_attempts = 10
         
-        # Add shutdown handler before starting
-        app.add_event_handler("shutdown", shutdown_event)
-        
-        # Create main task
-        main_task = asyncio.create_task(main())
-        
-        # Run server with main task
-        logger.info("Starting FreqAssistant server and bot...")
-        asyncio.run(
-            asyncio.gather(
-                server.serve(),
-                main_task,
-                return_exceptions=True
-            )
-        )
-    except KeyboardInterrupt:
-        logger.info("Received shutdown signal...")
-        if main_task and not main_task.done():
-            main_task.cancel()
+        for port_attempt in range(port, port + max_port_attempts):
+            try:
+                config = uvicorn.Config(
+                    app,
+                    host="0.0.0.0",
+                    port=port_attempt,
+                    log_level=log_level,
+                    lifespan="on"
+                )
+                
+                server = uvicorn.Server(config)
+                
+                # Add shutdown handler before starting
+                app.add_event_handler("shutdown", shutdown_event)
+                
+                # Create and run event loop
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                
+                try:
+                    # Create main task
+                    main_task = loop.create_task(main())
+                    
+                    # Run server with main task
+                    logger.info(f"Starting FreqAssistant server and bot on port {port_attempt}...")
+                    loop.run_until_complete(
+                        asyncio.gather(
+                            server.serve(),
+                            main_task,
+                            return_exceptions=True
+                        )
+                    )
+                    break  # If successful, exit the port attempt loop
+                except OSError as e:
+                    if e.errno == 98:  # Address already in use
+                        logger.warning(f"Port {port_attempt} is in use, trying next port")
+                        continue
+                    raise
+                finally:
+                    loop.close()
+                    
+            except KeyboardInterrupt:
+                logger.info("Received shutdown signal...")
+                if main_task and not main_task.done():
+                    main_task.cancel()
+                break
+                
     except Exception as e:
         logger.error(f"Fatal error: {e}")
         exit(1)
@@ -171,7 +223,10 @@ if __name__ == "__main__":
         # Ensure clean shutdown
         try:
             if bot is not None:
-                asyncio.run(shutdown_event())
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(shutdown_event())
+                loop.close()
         except Exception as e:
             logger.error(f"Error during final shutdown: {e}")
         logger.info("FreqAssistant shutdown complete")

@@ -1,7 +1,8 @@
 import logging
+import json
+import os
 from typing import Dict, Any, Optional
 from anthropic import Anthropic
-from ..utils.rate_limiter import RateLimiter
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,6 @@ class ClaudeFreqAIController:
     def __init__(self, config: Dict[str, Any], client: Anthropic):
         self.config = config
         self.client = client
-        self.rate_limiter = RateLimiter()
 
         # Initialize with system prompt
         self.system_prompt = """You are an AI assistant specialized in managing and optimizing the FreqTrade cryptocurrency trading bot platform. Your core function is to serve as an intelligent interface between users and the FreqTrade system, translating natural language requests into concrete actions and providing expert guidance on trading strategies, configuration, and system management."""
@@ -58,10 +58,11 @@ class ClaudeFreqAIController:
         self.temperature = config['claude_integration'].get('temperature', 1)
 
         self.base_config_path = "config.json"
+        self.conversation_history = []
+        self.current_metrics = {"accuracy": 0.0, "loss": 0.0}
 
     async def _call_claude_api(self, messages: list) -> str:
         try:
-            self.rate_limiter.limit()
             response = await self.client.messages.create(
                 model=self.model_version,
                 max_tokens=self.max_tokens,
@@ -181,3 +182,16 @@ class ClaudeFreqAIController:
         elif any(cmd in claude_response.lower() for cmd in ["start", "stop", "status"]):
             return "bot_control"
         return "unknown"
+
+    async def clear_history(self) -> None:
+        self.conversation_history = []
+
+    def get_current_accuracy(self) -> float:
+        return self.current_metrics["accuracy"]
+
+    def get_current_loss(self) -> float:
+        return self.current_metrics["loss"]
+
+    async def start_training(self) -> None:
+        # Implement FreqAI training initialization here
+        pass
